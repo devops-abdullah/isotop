@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  reverse-proxy:
+    #image: traefik:1.7
+    image: devopsengineerabdullah/traefik_mail_client:latest
+    command: --api --docker
+    ports:
+      #- "80:80"
+      - "8181:8080"
+      - "7443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+#      - /usr/local/src/isotope-mail-client/deployment-examples/traefik.toml:/traefik.toml
+#      - /usr/local/src/isotope-mail-client/deployment-examples/certs/:/certs/
+    container_name: traefik
+  isotope-server:
+    image: marcnuri/isotope:server-latest
+    ports:
+      - "9010:9010"
+    labels:
+      - traefik.backend=isotope-server
+      - "traefik.frontend.rule=PathPrefixStrip:/api/"
+
+  isotope-client:
+    image: devopsengineerabdullah/mail-client
+    ports:
+      - "8081:80"
+    labels:
+      - traefik.backend=isotope-client
+      - "traefik.frontend.rule=PathPrefixStrip:/"
+You have new mail in /var/spool/mail/root
